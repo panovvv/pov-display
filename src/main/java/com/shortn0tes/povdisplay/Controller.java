@@ -107,17 +107,16 @@ public class Controller {
 		if (isSerialPortOpen()) {
 			long number = numberBox.getNumber();
 			LOGGER.info(String.format("Trying to set number to %d", number));
-			String numberStr = Long.toString(number);
-			if (numberStr.length() < 3) {
-				int oldLength = numberStr.length();
-				for (int i = 0; i < 3 - oldLength; i++) {
-					numberStr = '_' + numberStr;
-				}
+			StringBuilder numberStr = new StringBuilder(Long.toString(number));
+			if (numberStr.length() == 1) {
+				numberStr.insert(1, '_');
+				numberStr.insert(0, '_');
+			} else if (numberStr.length() == 2) {
+				numberStr.insert(0, '_');
 			} else if (numberStr.length() > 3) {
-				numberStr = numberStr.substring(0, 3);
+				numberStr = new StringBuilder(numberStr.substring(0, 3));
 			}
-			byte[] numberBytes = String.format("%s%s", SET_NUMBER_PREFIX, numberStr).getBytes();
-
+			byte[] numberBytes = String.format("%s%s", SET_NUMBER_PREFIX, numberStr.toString()).getBytes();
 			new Thread(() -> {
 				Platform.runLater(() -> setNumberBtn.setDisable(true));
 				if (serialPort.writeBytes(numberBytes, numberBytes.length) < 0) {
